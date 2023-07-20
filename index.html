@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Isabel</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: black; 
+    }
+    
+    .upload-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .custom-file-upload {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: transparent;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 20px;
+      background-image: linear-gradient(to right, #fc09e7, #6107f1, #0820fd, #0883f7);
+      background-size: 300% auto;
+      transition: background-position 0.5s;
+    }
+    
+    .custom-file-upload:hover {
+      background-position: 100% 0;
+    }
+    
+    #gallery {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    
+    .photo {
+      margin: 10px;
+      position: relative;
+    }
+    
+    .photo img {
+      width: 200px;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .delete-button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 30px;
+      height: 30px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      background-color: transparent;
+    }
+    
+    .delete-button__icon {
+      width: 20px;
+      height: 20px;
+      fill: white;
+    }
+    
+    .delete-button__icon:hover {
+      fill: #ff3333;
+    }
+    
+    .button {
+      --border-right: 6px;
+      --text-stroke-color: rgba(255,255,255,0.6);
+      --animation-color: #37C4FF;
+      --fs-size: 2em;
+      letter-spacing: 3px;
+      text-decoration: none;
+      font-size: var(--fs-size);
+      font-family: "Arial";
+      position: relative;
+      text-transform: uppercase;
+      color: transparent;
+      -webkit-text-stroke: 1px var(--text-stroke-color);
+      margin: 0;
+      height: auto;
+      background: transparent;
+      padding: 0;
+      border: none;
+    }
+    
+    .button:hover .hover-text {
+      width: 100%;
+      filter: drop-shadow(0 0 23px var(--animation-color));
+    }
+    
+    .hover-text {
+      position: absolute;
+      box-sizing: border-box;
+      content: attr(data-text);
+      color: var(--animation-color);
+      width: 0%;
+      inset: 0;
+      border-right: var(--border-right) solid var(--animation-color);
+      overflow: hidden;
+      transition: 1.5s;
+      -webkit-text-stroke: 1px var(--animation-color);
+    }
+    
+    /* Estilos para dispositivos móviles */
+    @media (max-width: 600px) {
+      .photo {
+        margin: 5px;
+      }
+      
+      .photo img {
+        width: 100%;
+        height: auto;
+      }
+      
+      .upload-container {
+        padding: 10px;
+      }
+      
+      h1 {
+        font-size: 24px;
+        margin-bottom: 10px;
+      }
+      
+      body {
+        zoom: 1.5;
+      }
+    }
+  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+  <div class="upload-container">
+    <h1>Isabel</h1>
+  
+    <button data-text="Isabel" class="button">
+      <span class="actual-text">&nbsp;Isabel&nbsp;</span>
+      <span class="hover-text" aria-hidden="true">&nbsp;Isabel&nbsp;</span>
+    </button>
+    
+    <label for="file-upload" class="custom-file-upload">
+      Agregar imagen
+    </label>
+    <input type="file" id="file-upload" accept="image/*" multiple style="display: none;">
+  </div>
+  
+  <div id="gallery"></div>
+  
+  <script>
+    const uploadButton = document.getElementById('file-upload');
+    const gallery = document.getElementById('gallery');
+    
+    let uploadedImages = []; 
+    
+    uploadButton.addEventListener('change', handleUpload);
+    
+    function handleUpload(event) {
+      const files = event.target.files;
+      
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        
+        
+        if (file.type.startsWith('image/')) {
+          const reader = new FileReader();
+          
+          reader.onload = function(e) {
+            const imageUrl = e.target.result;
+            
+          
+            const imgElement = document.createElement('img');
+            imgElement.src = imageUrl;
+            
+            const photoContainer = document.createElement('div');
+            photoContainer.className = 'photo';
+            photoContainer.appendChild(imgElement);
+            
+         
+            const deleteButton = document.createElement('button');
+            deleteButton.className = 'delete-button';
+            deleteButton.innerHTML = `
+              <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" class="delete-button__icon">
+                <path d="M0 0h24v24H0z" fill="none"/>
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/>
+              </svg>
+            `;
+            deleteButton.addEventListener('click', function() {
+              deleteImage(imgElement);
+            });
+            
+            photoContainer.appendChild(deleteButton);
+            
+            gallery.appendChild(photoContainer);
+            
+           
+            uploadedImages.push(imageUrl);
+            
+          
+            saveImagesToCache(uploadedImages);
+          }
+          
+          reader.readAsDataURL(file);
+        }
+      }
+    }
+    
+    function deleteImage(imgElement) {
+      const photoContainer = imgElement.parentNode;
+      gallery.removeChild(photoContainer);
+      
+    
+      const index = uploadedImages.indexOf(imgElement.src);
+      if (index > -1) {
+        uploadedImages.splice(index, 1);
+      }
+      
+    
+      saveImagesToCache(uploadedImages);
+    }
+    
+    function saveImagesToCache(images) {
+      caches.open('uploadedImagesCache').then(function(cache) {
+        cache.put('/uploaded-images', new Response(JSON.stringify(images)));
+      });
+    }
+    
+    function loadImagesFromCache() {
+      caches.open('uploadedImagesCache').then(function(cache) {
+        cache.match('/uploaded-images').then(function(response) {
+          if (response) {
+            response.json().then(function(data) {
+              uploadedImages = data;
+              
+              uploadedImages.forEach(function(imageUrl) {
+                const imgElement = document.createElement('img');
+                imgElement.src = imageUrl;
+                
+                const photoContainer = document.createElement('div');
+                photoContainer.className = 'photo';
+                photoContainer.appendChild(imgElement);
+                
+                const deleteButton = document.createElement('button');
+                deleteButton.className = 'delete-button';
+                deleteButton.innerHTML = `
+                  <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" class="delete-button__icon">
+                    <path d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/>
+                  </svg>
+                `;
+                deleteButton.addEventListener('click', function() {
+                  deleteImage(imgElement);
+                });
+                
+                photoContainer.appendChild(deleteButton);
+                
+                gallery.appendChild(photoContainer);
+              });
+            });
+          }
+        });
+      });
+    }
+    
+    // Cargar las imágenes almacenadas al cargar la página
+    window.addEventListener('DOMContentLoaded', loadImagesFromCache);
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!-- Agregar la biblioteca de Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js" type="module"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-storage.js" type="module"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-analytics.js" type="module"></script>
+
+  <!-- Tu configuración de Firebase -->
+  <script type="module">
+    // Importar las funciones que necesitas de los SDKs
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
+    import { getStorage, ref, listAll, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-storage.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-analytics.js";
+
+    // Tu configuración de Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyC__dWyX2u4HMagiODck-Z9iCnFpb5JNtY",
+        authDomain: "isabel-84340.firebaseapp.com",
+        projectId: "isabel-84340",
+        storageBucket: "isabel-84340.appspot.com",
+        messagingSenderId: "73883437510",
+        appId: "1:73883437510:web:45df79858ae1049a69cac7",
+        measurementId: "G-B7PTZTLMQ3"
+    };
+
+    // Inicializar Firebase
+    const app = initializeApp(firebaseConfig);
+    const storage = getStorage(app);
+    const analytics = getAnalytics(app);
+
+    const gallery = document.getElementById('gallery');
+
+    // Obtener todas las imágenes almacenadas en Firebase Storage
+    async function getImagesFromStorage() {
+      try {
+        const storageRef = ref(storage, 'images');
+        const imageList = await listAll(storageRef);
+
+        imageList.items.forEach(async (imageRef) => {
+          const imageUrl = await getDownloadURL(imageRef);
+
+          // Crear elemento de imagen y agregar al DOM
+          const imgElement = document.createElement('img');
+          imgElement.src = imageUrl;
+
+          const photoContainer = document.createElement('div');
+          photoContainer.className = 'photo';
+          photoContainer.appendChild(imgElement);
+
+          gallery.appendChild(photoContainer);
+        });
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    // Cargar las imágenes almacenadas al abrir la página
+    window.addEventListener('DOMContentLoaded', getImagesFromStorage);
+
+    // Función para cargar imágenes en la galería desde otra página
+    function loadImagesInOtherPage(imageUrl) {
+      // Crear elemento de imagen y agregar al DOM
+      const imgElement = document.createElement('img');
+      imgElement.src = imageUrl;
+
+      const photoContainer = document.createElement('div');
+      photoContainer.className = 'photo';
+      photoContainer.appendChild(imgElement);
+
+      gallery.appendChild(photoContainer);
+    }
+
+    // Escuchar el evento 'imageUploaded' en la ventana
+    window.addEventListener('imageUploaded', function(event) {
+      const imageUrl = event.detail;
+
+      // Cargar la imagen en la galería
+      loadImagesInOtherPage(imageUrl);
+    });
+  </script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: black; 
+    }
+
+    #gallery {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .photo {
+      margin: 10px;
+      position: relative;
+    }
+
+    .photo img {
+      width: 200px;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+<body>
+  <h1>Isabel - Galería</h1>
+
+  <div id="gallery"></div>
+</body>
+</html>
